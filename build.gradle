@@ -15,6 +15,22 @@ buildscript {
     }
 }
 
+plugins {
+    id "org.sonarqube" version "4.0.0.2929"
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectName", "NewPipe"
+        property "sonar.projectKey", "NewPipe"
+        property "sonar.host.url", "http://localhost:9000"
+        property "sonar.token", "sqa_91cd21d70b6337a14ec07614c484f4c69f35c6fe" // Replace with a generated token
+    }
+}
+
+
+
+
 allprojects {
     repositories {
         google()
