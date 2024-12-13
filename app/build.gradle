@@ -8,8 +8,10 @@ plugins {
     id "kotlin-kapt"
     id "kotlin-parcelize"
     id "checkstyle"
+    id "jacoco"
     id "org.sonarqube" version "4.0.0.2929"
 }
+
 
 android {
     compileSdk 34
@@ -35,6 +37,11 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+            buildTypes {
+                debug {
+                    testCoverageEnabled = true // Enable code coverage for debug builds
+                }
             }
         }
     }
@@ -158,6 +165,7 @@ tasks.register('runCheckstyle', Checkstyle) {
         xml.getRequired().set(true)
         html.getRequired().set(true)
     }
+
 }
 
 def outputDir = "${project.buildDir}/reports/ktlint/"
@@ -180,7 +188,25 @@ tasks.register('formatKtlint', JavaExec) {
     args "-F", "src/**/*.kt"
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
 }
+tasks.register('jacocoTestReport', JacocoReport) {
+    dependsOn 'testDebugUnitTest'
 
+    executionData files(
+            layout.buildDirectory.file('jacoco/test.exec').get().asFile,
+            layout.buildDirectory.file('jacoco/fetcherTest.exec').get().asFile,
+            layout.buildDirectory.file('jacoco/databaseTest.exec').get().asFile)
+
+    reports {
+        xml.required = true // XML report for SonarQube
+        html.required = true // Optional: HTML report for local viewing
+        csv.required = true
+    }
+
+    def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*'])
+    sourceDirectories.setFrom(files(['src/main/java']))
+    classDirectories.setFrom(files(debugTree))
+    executionData.setFrom(files("${buildDir}/jacoco/testDebugUnitTest.exec"))
+}
 afterEvaluate {
     if (!System.properties.containsKey('skipFormatKtlint')) {
         preDebugBuild.dependsOn formatKtlint
@@ -195,6 +221,8 @@ sonar {
         property "sonar.host.url", "https://sonarcloud.io"
     }
 }
+
+
 
 dependencies {
 /** Desugaring **/

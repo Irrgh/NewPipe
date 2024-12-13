@@ -17,18 +17,28 @@ buildscript {
 
 plugins {
     id "org.sonarqube" version "4.0.0.2929"
+    id 'jacoco'
 }
 
+jacoco {
+    toolVersion = "0.8.10" // Use the latest stable version
+}
 sonarqube {
     properties {
         property "sonar.projectName", "NewPipe"
         property "sonar.projectKey", "NewPipe"
         property "sonar.host.url", "http://localhost:9000"
-        property "sonar.token", "sqa_91cd21d70b6337a14ec07614c484f4c69f35c6fe" // Replace with a generated token
+        property "sonar.token", "sqp_70981f87dd358497dc896e63683e0f7a7ee420b5" // Replace with a generated token
+        // Coverage reports
+        property "sonar.java.coveragePlugin", "jacoco"
+        property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/testDebugUnitTest/jacocoTestReport.xml"
+        property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/app/build/test-results/testDebugUnitTest/binary/**.xml"
+        // Include/exclude files
+        property "sonar.sources", "src/main/java"
+        property "sonar.tests", "src/test/java"
+        property "sonar.exclusions", "**/R.class, **/BuildConfig.*, **/Manifest*.*"
     }
 }
-
-
 
 
 allprojects {
