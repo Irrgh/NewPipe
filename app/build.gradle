@@ -9,7 +9,29 @@ plugins {
     id "kotlin-parcelize"
     id "checkstyle"
     id "org.sonarqube" version "4.0.0.2929"
+    id 'jacoco'  // Apply the JaCoCo plugin
 }
+
+jacoco {
+    toolVersion = "0.8.8"  // Make sure this is a recent version
+}
+
+tasks.withType(Test) {
+    finalizedBy jacocoTestReport  // Ensure the coverage report is generated after tests
+}
+
+task jacocoTestReport(type:JacocoReport) {
+    dependsOn("testDebugUnitTest")
+    reports {
+        xml.required = true;
+        html.required = true;
+    }
+}
+
+
+
+
+
 
 android {
     compileSdk 34
